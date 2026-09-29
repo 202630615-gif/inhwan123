@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full bg-slate-950 text-slate-100 select-none">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>10초 AI 식곤증 탈출 10대 미니게임 Center</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            touch-action: manipulation;
+            background-color: #08090f;
+            overflow-x: hidden;
+        }
+        .font-jua { font-family: 'Jua', sans-serif; }
+        .neon-glow-cyan {
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.35), inset 0 0 10px rgba(0, 255, 204, 0.15);
+        }
+        .neon-text-cyan {
+            text-shadow: 0 0 8px rgba(0, 255, 204, 0.8), 0 0 18px rgba(0, 255, 204, 0.4);
+        }
+        .neon-text-pink {
+            text-shadow: 0 0 8px rgba(255, 0, 85, 0.8), 0 0 18px rgba(255, 0, 85, 0.4);
+        }
+        .alarm-flash {
+            animation: flashBg 0.25s infinite alternate;
+        }
+        @keyframes flashBg {
+            0% { background-color: #08090f; }
+            100% { background-color: #4a0416; }
+        }
+        .timer-warning {
+            animation: timerPulse 0.3s infinite alternate;
+        }
+        @keyframes timerPulse {
+            0% { transform: scale(1); color: #ff0055; }
+            100% { transform: scale(1.08); color: #ffea00; }
+        }
+        .gate-door-left {
+            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        .gate-door-right {
+            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        .gate-open-left { transform: translateX(-100%); }
+        .gate-open-right { transform: translateX(100%); }
+    </style>
+</head>
+<body id="main-body" class="min-h-screen flex flex-col justify-between items-center p-2 sm:p-4 text-slate-100">
+
+    <div id="cyber-gate" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 overflow-hidden">
+        <div id="door-left" class="gate-door-left absolute top-0 left-0 w-1/2 h-full bg-slate-900 border-r-4 border-cyan-500/80 flex flex-col items-end justify-center pr-4 sm:pr-8 shadow-2xl">
+            <div class="w-16 h-40 border-y-2 border-l-2 border-cyan-400/40 rounded-l-lg mb-8"></div>
+            <div class="text-right">
+                <p class="text-xs text-cyan-400/70 font-mono tracking-widest mb-1">SLEEP ESCAPE</p>
+                <p class="font-jua text-2xl sm:text-4xl text-cyan-400 neon-text-cyan">식곤증 탈출</p>
+            </div>
+        </div>
+        <div id="door-right" class="gate-door-right absolute top-0 right-0 w-1/2 h-full bg-slate-900 border-l-4 border-cyan-500/80 flex flex-col items-start justify-center pl-4 sm:pl-8 shadow-2xl">
+            <div class="w-16 h-40 border-y-2 border-r-2 border-cyan-400/40 rounded-r-lg mb-8"></div>
+            <div class="text-left">
+                <p class="text-xs text-rose-400/70 font-mono tracking-widest mb-1">ARCADE HUB</p>
+                <p class="font-jua text-2xl sm:text-4xl text-rose-500 neon-text-pink">MINI GAMES</p>
+            </div>
+        </div>
+        <div id="gate-center-btn" class="relative z-10 text-center p-4">
+            <button onclick="openCyberGate()" class="px-6 py-4 bg-slate-950/90 border-2 border-cyan-400 rounded-2xl neon-glow-cyan hover:scale-105 active:scale-95 transition transform group">
+                <span class="block text-3xl mb-1">⚡</span>
+                <span class="font-jua text-lg sm:text-2xl text-cyan-300 neon-text-cyan group-hover:text-cyan-200">
+                    DOOR OPEN (문 열기)
+                </span>
+                <span class="block text-[11px] text-slate-400 mt-1">터치하거나 [Enter] 키를 누르세요</span>
+            </button>
+        </div>
+    </div>
+
+    <header class="w-full max-w-xl text-center my-2">
+        <div class="flex items-center justify-between px-2 mb-1">
+            <button onclick="showHubMenu()" class="text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 px-3 py-1.5 rounded-xl font-bold transition">
+                🏠 게임 목록
+            </button>
+            <h1 class="font-jua text-xl sm:text-2xl text-cyan-400 neon-text-cyan">
+                ⚡ 식곤증 탈출 ARCADE ⚡
+            </h1>
+            <button id="header-stop-siren" onclick="stopSiren()" class="hidden text-xs sm:text-sm bg-rose-600 hover:bg-rose-500 text-white font-black px-3 py-1.5 rounded-xl animate-pulse">
+                🚨 사이렌 끄기
+            </button>
+        </div>
+    </header>
+
+    <section id="game-hub" class="w-full max-w-xl my-auto p-2">
+        <div class="text-center mb-4">
+            <h2 class="font-jua text-lg sm:text-xl text-amber-300">뇌를 깨울 미니게임을 선택하세요!</h2>
+            <p class="text-xs text-slate-400">10초 타임어택 미션을 성공하면 강력한 잠깨기 사이렌이 울립니다.</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5 max-h-[62vh] overflow-y-auto p-1">
+            <button onclick="launchGame(1)" class="bg-slate-900/90 border-2 border-cyan-500/60 hover:border-cyan-400 p-3 rounded-2xl text-left hover:bg-slate-800/90 transition transform active:scale-95 shadow-md flex flex-col justify-between">
+                <div>
+                    <span class="text-2xl">🌀</span>
+                    <h3 class="font-jua text-base text-cyan-300 mt-1">10초 AI 미로 탈출</h3>
+                    <p class="text-[11px] text-slate-400">방향키로 길을 찾아 10초 안에 탈출구 도달</p>
+                </div>
+                <span class="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-700/50 px-2 py-0.5 rounded mt-2 self-start">방향키/WASD</span>
+            </button>
+
+            <button onclick="launchGame(2)" class="bg-slate-900/90 border-2 border-rose-500/60 hover:border-rose-400 p-3 rounded-2xl text-left hover:bg-slate-800/90 transition transform active:scale-95 shadow-md flex flex-col justify-between">
+                <div>
+                    <span class="text-2xl">⚡</span>
+                    <h3 class="font-jua text-base text-rose-400 mt-1">10초 광클 연타</h3>
+                    <p class="text-[11px] text-slate-400">10초 안에 버튼을 30회 이상 광속 클릭</p>
+                </div>
+                <span class="text-[10px] bg-rose-950 text-rose-300 border border-rose-700/50 px-2 py-0.5 rounded mt-2 self-start">연타 피지컬</span>
+            </button>
+
+            <button onclick="launchGame(3)" class="bg-slate-900/90 border-2 border-amber-500/60 hover:border-amber-400 p-3 rounded-2xl text-left hover:bg-slate-800/90 transition transform active:scale-95 shadow-md flex flex-col justify-between">
+                <div>
+                    <span class="text-2xl">🧠</span>
+                    <h3 class="font-jua text-base text-amber-300 mt-1">암기력 칼라 패턴</h3>
+                    <p class="text-[11px] text-slate-400">반짝이는 4색 네온 패턴 순서 순발력 기억</p>
+                </div>
+                <span class="text-[10px] bg-amber-950 text-amber-300 border border-amber-700/50 px-2 py-0.5 rounded mt-2 self-start">기억력 테스트</span>
+            </button>
+
+            <button onclick="launchGame(4)" class="bg-slate-900/90 border-2 border-emerald-500/60 hover:border-emerald-400 p-3 rounded-2xl text-left hover:bg-slate-800/90 transition transform active:scale-95 shadow-md flex flex-col justify-between">
+                <div>
+                    <span class="text-2xl">🔥</span>
+                    <h3 class="font-jua text-base text-emerald-300 mt-1">뇌각성 암산 퀴즈</h3>
+                    <p class="text-[11px] text-slate-400">10초 동안 사칙연산 문제 4개 연속 정답</p>
+                </div>
+                <span class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-700/50 px-2 py-0.5 rounded mt-2 self-start">두뇌 계산력</span>
+            </button>
+
+            <button onclick="launchGame(5)" class="bg-slate-900/90 border-2 border-indigo-500/60 hover:border-indigo-400 p-3 rounded-2xl text-left hover:bg-slate-800/90 transition transform active:scale-95 shadow-md flex flex-col justify-between">
+                <div>
+                    <span class="text-2xl">🎯</span>
+                    <h3 class="font-jua text-base text-indigo-300 mt-1">동공 지진 타겟</h3>
+                    <p class="text-[11px] text-slate-400">광속으로 이동하는 타겟 target 5회 정조준</p>
+                </div>
+                <span class="text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-700/50 px-2 py-0.5 rounded mt-2 self-start">반응속도</span>
+            </button>
+
+            <button onclick="launchGame(6)" class="bg-slate-900/90 border-2 border-purple-500/60 hover:border-purple-400 p-3 rounded-2xl text-left hover:bg-slate-800/90 transition transform active:scale-95 shadow-md flex flex-col justify-between">
+                <div>
+                    <span class="text-2xl">⌨️</span>
+                    <h3 class="font-jua text-base text-purple-300 mt-1">광속 단어 타자</h3>
+                    <p class="text-[11px] text-slate-400">제시되는 3개 단어를 10초 내 정확히 입력</p>
+                </div>
+                <span class="text-[10px] bg-purple-950 text-purple-300 border border-purple-700/50 px-2 py-0.5 rounded mt-2 self-start">순발력 타자</span>
+            </button>
+
+            <button onclick="launchGame(7)" class="bg-slate-900/90 border-2 border-pink-500/60 hover:border-pink-400 p-3 rounded-2xl text-left hover:bg-slate-800/90 transition transform active:scale-95 shadow-md flex flex-col justify-between">
+                <div>
+                    <span class="text-2xl">🛑</span>
+                    <h3 class="font-jua text-base text-pink-300 mt-1">0.01초 멈추기</h3>
+                    <p class="text-[11px] text-slate-400">초기화 타이머를 정확히 5.00초에 맞추기</p>
+                </div>
+                <span class="text-[10px] bg-pink-950 text-pink-300 border border-pink-700/50 px-2 py-0.5 rounded mt-2 self-start">초고도 집중력</span>
+            </button>
+
+            <button onclick="launchGame(8)" class="bg-slate-900/90 border-2 border-red-500/60 hover:border-red-400 p-3 rounded-2xl text-left hover:bg-slate-800/90 transition transform active:scale-95 shadow-md flex flex-col justify-between">
+                <div>
+                    <span class="text-2xl">💥</span>
+                    <h3 class="font-jua text-base text-red-400 mt-1">몬스터 탭 Smash</h3>
+                    <p class="text-[11px] text-slate-400">파란 원을 피하고 빨간 몬스터만 8회 탭</p>
+                </div>
+                <span class="text-[10px] bg-red-950 text-red-300 border border-red-700/50 px-2 py-0.5 rounded mt-2 self-start">동체시력</span>
+            </button>
+
+            <button onclick="launchGame(9)" class="bg-slate-900/90 border-2 border-teal-500/60 hover:border-teal-400 p-3 rounded-2xl text-left hover:bg-slate-800/90 transition transform active:scale-95 shadow-md flex flex-col justify-between">
+                <div>
+                    <span class="text-2xl">🔄</span>
+                    <h3 class="font-jua text-base text-teal-300 mt-1">정반대로 누르기</h3>
+                    <p class="text-[11px] text-slate-400">화면에 보이는 화살표의 반대 방향키 입력</p>
+                </div>
+                <span class="text-[10px] bg-teal-950 text-teal-300 border border-teal-700/50 px-2 py-0.5 rounded mt-2 self-start">역발상 인지</span>
+            </button>
+
+            <button onclick="launchGame(10)" class="bg-slate-900/90 border-2 border-yellow-500/60 hover:border-yellow-400 p-3 rounded-2xl text-left hover:bg-slate-800/90 transition transform active:scale-95 shadow-md flex flex-col justify-between">
+                <div>
+                    <span class="text-2xl">💣</span>
+                    <h3 class="font-jua text-base text-yellow-300 mt-1">시한폭탄 비밀번호</h3>
+                    <p class="text-[11px] text-slate-400">힌트를 보고 10초 내 4자리 폭탄 비밀번호 해제</p>
+                </div>
+                <span class="text-[10px] bg-yellow-950 text-yellow-300 border border-yellow-700/50 px-2 py-0.5 rounded mt-2 self-start">추리 암호</span>
+            </button>
+        </div>
+    </section>
+
+    <section id="game-display" class="w-full max-w-md flex flex-col items-center gap-2 hidden my-auto">
+        <!-- Difficulty Bar for Maze -->
+        <div id="diff-bar" class="w-full flex gap-1 justify-center mb-1 hidden">
+            <button onclick="setDifficulty(7)" id="diff-easy" class="px-3 py-1 bg-cyan-900/80 border border-cyan-400 text-cyan-200 text-xs font-bold rounded-lg transition">🟢 쉬움 (7x7)</button>
+            <button onclick="setDifficulty(9)" id="diff-norm" class="px-3 py-1 bg-slate-800 border border-slate-600 text-slate-300 text-xs font-bold rounded-lg transition">🟡 보통 (9x9)</button>
+            <button onclick="setDifficulty(11)" id="diff-hard" class="px-3 py-1 bg-slate-800 border border-slate-600 text-slate-300 text-xs font-bold rounded-lg transition">🔴 어려움 (11x11)</button>
+        </div>
+
+        <div class="w-full bg-slate-950/90 border-2 border-rose-500/80 rounded-2xl p-2 flex justify-between items-center px-5 shadow-inner">
+            <span class="text-xs sm:text-sm font-bold text-rose-300 flex items-center gap-1">
+                ⏱️ 제한 시간
+            </span>
+            <div id="timer-box" class="font-jua text-2xl sm:text-3xl text-rose-500 neon-text-pink tracking-wider transition-all">
+                <span id="timer">10.00</span><span class="text-xs text-rose-400 ml-1">초</span>
+            </div>
+        </div>
+
+        <div class="relative w-full aspect-square max-w-[340px] bg-slate-950 rounded-2xl border-4 border-cyan-500/80 neon-glow-cyan p-2 flex flex-col items-center justify-center overflow-hidden">
+            <canvas id="gameCanvas" class="w-full h-full rounded-xl block bg-slate-950 hidden"></canvas>
+
+            <div id="html-game-box" class="w-full h-full flex flex-col items-center justify-center gap-3 p-2 text-center"></div>
+
+            <div id="result-overlay" class="absolute inset-0 bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center p-4 text-center z-20 hidden">
+                <div id="result-icon" class="text-5xl mb-1">🎉</div>
+                <h2 id="result-title" class="font-jua text-2xl text-cyan-400 mb-1">성공! 식곤증 퇴치!</h2>
+                <p id="result-desc" class="text-xs text-slate-300 mb-4">강력한 사이렌이 졸음을 완전히 쫓아냅니다.</p>
+                <div class="flex flex-col gap-2 w-full max-w-[200px]">
+                    <button onclick="restartCurrentGame()" class="py-2.5 bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black text-sm rounded-xl shadow transform active:scale-95 transition">
+                        🔄 다시 도전하기
+                    </button>
+                    <button onclick="showHubMenu()" class="py-2 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs rounded-xl border border-slate-600 transition">
+                        🏠 다른 게임 선택
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="message-bar" class="text-center text-xs sm:text-sm font-bold text-cyan-300 min-h-[20px]">
+            [게임 시작] 버튼을 누르세요!
+        </div>
+
+        <div class="w-full flex flex-col items-center gap-2">
+            <div class="w-full flex gap-2">
+                <button id="start-btn" onclick="startGameSession()" class="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-teal-400 hover:from-cyan-400 hover:to-teal-300 text-slate-950 font-black text-sm sm:text-base rounded-xl shadow-lg transform active:scale-95 transition">
+                    🚀 게임 시작
+                </button>
+                <button id="stop-siren-btn" onclick="stopSiren()" class="hidden flex-1 py-3 bg-rose-600 hover:bg-rose-500 text-white font-black text-sm sm:text-base rounded-xl shadow-lg animate-bounce">
+                    🚨 사이렌 끄기
+                </button>
+            </div>
+
+            <div id="touch-controls" class="hidden grid-cols-3 gap-1 w-36 mt-1 sm:hidden">
+                <div></div>
+                <button onclick="handleTouchMove(0, -1)" class="py-2 bg-slate-800 border border-slate-700 rounded text-cyan-400 text-base font-bold active:bg-cyan-500 active:text-slate-950">▲</button>
+                <div></div>
+                <button onclick="handleTouchMove(-1, 0)" class="py-2 bg-slate-800 border border-slate-700 rounded text-cyan-400 text-base font-bold active:bg-cyan-500 active:text-slate-950">◀</button>
+                <button onclick="handleTouchMove(0, 1)" class="py-2 bg-slate-800 border border-slate-700 rounded text-cyan-400 text-base font-bold active:bg-cyan-500 active:text-slate-950">▼</button>
+                <button onclick="handleTouchMove(1, 0)" class="py-2 bg-slate-800 border border-slate-700 rounded text-cyan-400 text-base font-bold active:bg-cyan-500 active:text-slate-950">▶</button>
+            </div>
+        </div>
+    </section>
+
+    <footer class="text-center text-[11px] text-slate-500 my-2">
+        10초 타임어택 잠깨기 미니게임 시뮬레이터 &copy; SLEEP ESCAPE
+    </footer>
+
+    <script>
+        const cyberGate = document.getElementById('cyber-gate');
+        const gameHub = document.getElementById('game-hub');
+        const gameDisplay = document.getElementById('game-display');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const htmlBox = document.getElementById('html-game-box');
+        const diffBar = document.getElementById('diff-bar');
+        const timerEl = document.getElementById('timer');
+        const timerBox = document.getElementById('timer-box');
+        const messageBar = document.getElementById('message-bar');
+        const resultOverlay = document.getElementById('result-overlay');
+        const startBtn = document.getElementById('start-btn');
+        const stopSirenBtn = document.getElementById('stop-siren-btn');
+        const headerStopSiren = document.getElementById('header-stop-siren');
+        const mainBody = document.getElementById('main-body');
+        const touchControls = document.getElementById('touch-controls');
+
+        let audioCtx = null;
+        let sirenOsc = null;
+        let sirenGain = null;
+        let sirenInterval = null;
+
+        let activeGameId = 1;
+        let isPlaying = false;
+        let timeLeft = 10.00;
+        let timerInterval = null;
+
+        // Game specific state
+        let gridCols = 7, gridRows = 7, cellSize = 0, mazeMap = [], player = {x:0, y:0}, goal = {x:6, y:6};
+        let clickCount = 0, targetClicks = 30;
+        let colorSequence = [], userSequence = [], isDisplayingPattern = false;
+        let mathAnswer = 0, mathScore = 0, mathGoal = 4;
+        let aimTargets = [], aimScore = 0, aimGoal = 5;
+        let wordList = ["SLEEP", "WAKEUP", "ALERT", "ENERGY", "ESCAPE", "BRAIN", "POWER", "ACTION"];
+        let targetWords = [], currentWordIdx = 0;
+        let monsterTargets = [], monsterScore = 0, monsterGoal = 8;
+        let currentArrowDir = 0, rivalScore = 0, rivalGoal = 6;
+        const dirNames = ["▲ 위쪽", "▶ 오른쪽", "▼ 아래쪽", "◀ 왼쪽"];
+        const oppositeDirs = [2, 3, 0, 1];
+        let secretCode = "";
+
+        function openCyberGate() {
+            initAudioContext();
+            playGateSound();
+
+            document.getElementById('door-left').classList.add('gate-open-left');
+            document.getElementById('door-right').classList.add('gate-open-right');
+            document.getElementById('gate-center-btn').classList.add('opacity-0', 'transition', 'duration-300');
+
+            setTimeout(() => {
+                cyberGate.classList.add('hidden');
+            }, 800);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !cyberGate.classList.contains('hidden')) {
+                openCyberGate();
+            }
+        });
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playGateSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.5);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.6);
+        }
+
+        function playBeep(freq = 440, type = 'sine', duration = 0.1) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playSirenSound() {
+            initAudioContext();
+            stopSiren();
+
+            sirenOsc = audioCtx.createOscillator();
+            sirenGain = audioCtx.createGain();
+            sirenOsc.type = 'sawtooth';
+            sirenOsc.connect(sirenGain);
+            sirenGain.connect(audioCtx.destination);
+
+            let isHigh = false;
+            sirenOsc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            sirenGain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+            sirenOsc.start();
+
+            sirenInterval = setInterval(() => {
+                if (!sirenOsc) return;
+                const targetFreq = isHigh ? 600 : 1250;
+                sirenOsc.frequency.exponentialRampToValueAtTime(targetFreq, audioCtx.currentTime + 0.12);
+                isHigh = !isHigh;
+            }, 160);
+        }
+
+        function stopSiren() {
+            if (sirenInterval) {
+                clearInterval(sirenInterval);
+                sirenInterval = null;
+            }
+            if (sirenOsc) {
+                try {
+                    sirenOsc.stop();
+                    sirenOsc.disconnect();
+                } catch(e) {}
+                sirenOsc = null;
+            }
+            stopSirenBtn.classList.add('hidden');
+            headerStopSiren.classList.add('hidden');
+            mainBody.classList.remove('alarm-flash');
+        }
+
+        function showHubMenu() {
+            stopSiren();
+            clearInterval(timerInterval);
+            isPlaying = false;
+            gameDisplay.classList.add('hidden');
+            gameHub.classList.remove('hidden');
+        }
+
+        function launchGame(gameId) {
+            activeGameId = gameId;
+            gameHub.classList.add('hidden');
+            gameDisplay.classList.remove('hidden');
+            setupGameUI(gameId);
+        }
+
+        function setDifficulty(size) {
+            gridCols = size;
+            gridRows = size;
+            goal = {x: size - 1, y: size - 1};
+            
+            ['diff-easy', 'diff-norm', 'diff-hard'].forEach(id => {
+                const btn = document.getElementById(id);
+                btn.className = "px-3 py-1 bg-slate-800 border border-slate-600 text-slate-300 text-xs font-bold rounded-lg transition";
+            });
+
+            if (size === 7) document.getElementById('diff-easy').className = "px-3 py-1 bg-cyan-900/80 border border-cyan-400 text-cyan-200 text-xs font-bold rounded-lg transition";
+            else if (size === 9) document.getElementById('diff-norm').className = "px-3 py-1 bg-amber-900/80 border border-amber-400 text-amber-200 text-xs font-bold rounded-lg transition";
+            else if (size === 11) document.getElementById('diff-hard').className = "px-3 py-1 bg-rose-900/80 border border-rose-400 text-rose-200 text-xs font-bold rounded-lg transition";
+
+            mazeMap = generateMaze(gridCols);
+            player = {x: 0, y: 0};
+            resizeCanvas();
+        }
+
+        function setupGameUI(gameId) {
+            stopSiren();
+            clearInterval(timerInterval);
+            isPlaying = false;
+            resultOverlay.classList.add('hidden');
+            timerBox.classList.remove('timer-warning');
+            timerEl.textContent = '10.00';
+            startBtn.classList.remove('hidden');
+
+            canvas.classList.add('hidden');
+            htmlBox.classList.remove('hidden');
+            diffBar.classList.add('hidden');
+            touchControls.classList.add('hidden');
+            touchControls.classList.remove('grid');
+
+            if (gameId === 1) { // Maze
+                canvas.classList.remove('hidden');
+                htmlBox.classList.add('hidden');
+                diffBar.classList.remove('hidden');
+                touchControls.classList.remove('hidden');
+                touchControls.classList.add('grid');
+                messageBar.textContent = "방향키/WASD를 사용해 10초 내 출구로 이동하세요!";
+                setDifficulty(gridCols || 7);
+            } else if (gameId === 2) { // Clicker
+                messageBar.textContent = "10초 안에 버튼을 30번 클릭하세요!";
+                htmlBox.innerHTML = `
+                    <div class="font-jua text-2xl text-cyan-300">목표: <span id="click-target">0</span> / 30</div>
+                    <button id="clicker-btn" onclick="handleClicker()" class="w-32 h-32 rounded-full bg-rose-600 border-4 border-rose-300 text-white font-black text-xl shadow-lg active:scale-95 transition flex items-center justify-center">
+                        광클!!
+                    </button>
+                `;
+            } else if (gameId === 3) { // Color Memory
+                messageBar.textContent = "반짝이는 순서를 기억한 뒤 똑같이 누르세요!";
+                htmlBox.innerHTML = `
+                    <div id="simon-msg" class="font-jua text-sm text-cyan-300 mb-1">패턴 기억하기</div>
+                    <div class="grid grid-cols-2 gap-3 w-48 h-48">
+                        <button onclick="handleColorClick(0)" id="color-0" class="bg-red-600 rounded-xl active:opacity-50"></button>
+                        <button onclick="handleColorClick(1)" id="color-1" class="bg-blue-600 rounded-xl active:opacity-50"></button>
+                        <button onclick="handleColorClick(2)" id="color-2" class="bg-yellow-500 rounded-xl active:opacity-50"></button>
+                        <button onclick="handleColorClick(3)" id="color-3" class="bg-emerald-600 rounded-xl active:opacity-50"></button>
+                    </div>
+                `;
+            } else if (gameId === 4) { // Math
+                messageBar.textContent = "4개의 사칙연산 문제를 풀어 탈출하세요!";
+                htmlBox.innerHTML = `
+                    <div class="font-jua text-xs text-amber-300">진행률: <span id="math-score">0</span> / 4</div>
+                    <div id="math-problem" class="font-jua text-3xl text-cyan-300 my-2">? + ? = ?</div>
+                    <div id="math-options" class="grid grid-cols-2 gap-2 w-full max-w-[220px]"></div>
+                `;
+            } else if (gameId === 5) { // Aim
+                canvas.classList.remove('hidden');
+                htmlBox.classList.add('hidden');
+                messageBar.textContent = "광속 이동하는 타겟을 5회 조준 클릭하세요!";
+                aimScore = 0;
+                resizeCanvas();
+            } else if (gameId === 6) { // Typing
+                messageBar.textContent = "제시되는 단어 3개를 빠르게 입력하세요!";
+                htmlBox.innerHTML = `
+                    <div class="font-jua text-xs text-purple-300">남은 단어: <span id="typing-count">3</span>개</div>
+                    <div id="typing-target" class="font-jua text-2xl text-yellow-300 tracking-wider">READY</div>
+                    <input type="text" id="typing-input" oninput="checkTypingInput()" autocomplete="off" class="w-full max-w-[200px] text-center text-lg font-bold bg-slate-900 border-2 border-cyan-400 rounded-xl p-2 text-cyan-300 focus:outline-none" placeholder="단어 입력...">
+                `;
+            } else if (gameId === 7) { // Stopwatch
+                messageBar.textContent = "스톱워치를 정확히 5.00초에 맞추어 멈추세요!";
+                htmlBox.innerHTML = `
+                    <div id="stopwatch-display" class="font-jua text-4xl text-pink-400 neon-text-pink my-3">0.00</div>
+                    <button onclick="stopStopwatch()" class="px-6 py-3 bg-pink-600 hover:bg-pink-500 text-white font-black rounded-xl text-lg active:scale-95 transition shadow">
+                        🛑 NOW STOP!
+                    </button>
+                `;
+            } else if (gameId === 8) { // Monster Tap
+                canvas.classList.remove('hidden');
+                htmlBox.classList.add('hidden');
+                messageBar.textContent = "파란 원을 피하고 빨간 몬스터만 8회 탭하세요!";
+                monsterScore = 0;
+                resizeCanvas();
+            } else if (gameId === 9) { // Rival Arrow
+                messageBar.textContent = "화면에 뜨는 방향의 [정반대 방향키]를 누르세요!";
+                touchControls.classList.remove('hidden');
+                touchControls.classList.add('grid');
+                htmlBox.innerHTML = `
+                    <div class="font-jua text-xs text-teal-300">성공: <span id="rival-score">0</span> / 6</div>
+                    <div id="rival-arrow-box" class="font-jua text-3xl text-yellow-300 my-3">?</div>
+                    <div class="text-[11px] text-slate-400">키보드 방향키 또는 하단 버튼 사용</div>
+                `;
+            } else if (gameId === 10) { // Bomb Defuse
+                messageBar.textContent = "힌트를 활용하여 4자리 비밀번호를 맞추세요!";
+                secretCode = Math.floor(1000 + Math.random() * 9000).toString();
+                htmlBox.innerHTML = `
+                    <div id="bomb-hint" class="font-jua text-sm text-yellow-300">4자리 암호를 입력하세요</div>
+                    <input type="number" id="bomb-input" maxlength="4" class="w-36 text-center text-2xl font-black bg-slate-900 border-2 border-yellow-400 rounded-xl p-2 text-yellow-300 focus:outline-none" placeholder="1234">
+                    <button onclick="checkBombCode()" class="px-5 py-2 bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black rounded-xl text-sm transition">
+                        🔓 해제 시도
+                    </button>
+                `;
+            }
+        }
+
+        function startGameSession() {
+            initAudioContext();
+            stopSiren();
+            isPlaying = true;
+            timeLeft = 10.00;
+            timerEl.textContent = '10.00';
+            timerBox.classList.remove('timer-warning');
+
+            clearInterval(timerInterval);
+
+            const startTime = Date.now();
+            timerInterval = setInterval(() => {
+                if (!isPlaying) return;
+                const elapsed = (Date.now() - startTime) / 1000;
+                timeLeft = Math.max(0, 10 - elapsed);
+                timerEl.textContent = timeLeft.toFixed(2);
+
+                if (timeLeft <= 3.0) {
+                    timerBox.classList.add('timer-warning');
+                }
+
+                if (timeLeft <= 0) {
+                    endGame(false);
+                }
+            }, 10);
+
+            if (activeGameId === 1) {
+                player = {x:0, y:0};
+                mazeMap = generateMaze(gridCols);
+                drawBoard();
+            } else if (activeGameId === 2) {
+                clickCount = 0;
+                document.getElementById('click-target').textContent = '0';
+            } else if (activeGameId === 3) {
+                startColorMemory();
+            } else if (activeGameId === 4) {
+                mathScore = 0;
+                nextMathProblem();
+            } else if (activeGameId === 5) {
+                aimScore = 0;
+                spawnAimTarget();
+                drawAimCanvas();
+            } else if (activeGameId === 6) {
+                targetWords = [...wordList].sort(() => Math.random() - 0.5).slice(0, 3);
+                currentWordIdx = 0;
+                updateTypingUI();
+            } else if (activeGameId === 7) {
+                // Timer runs automatically
+            } else if (activeGameId === 8) {
+                monsterScore = 0;
+                spawnMonsterTargets();
+                drawMonsterCanvas();
+            } else if (activeGameId === 9) {
+                rivalScore = 0;
+                nextRivalArrow();
+            } else if (activeGameId === 10) {
+                secretCode = Math.floor(1000 + Math.random() * 9000).toString();
+                document.getElementById('bomb-hint').textContent = "4자리 숫자를 맞추세요!";
+                document.getElementById('bomb-input').value = "";
+            }
+        }
+
+        function restartCurrentGame() {
+            resultOverlay.classList.add('hidden');
+            setupGameUI(activeGameId);
+            startGameSession();
+        }
+
+        function generateMaze(size) {
+            let maze = Array.from({ length: size }, () => Array(size).fill(1));
+            function carve(x, y) {
+                maze[y][x] = 0;
+                const directions = [[0,-2],[0,2],[-2,0],[2,0]].sort(() => Math.random() - 0.5);
+                for (let [dx, dy] of directions) {
+                    let nx = x + dx, ny = y + dy;
+                    if (nx >= 0 && nx < size && ny >= 0 && ny < size && maze[ny][nx] === 1) {
+                        maze[y + dy/2][x + dx/2] = 0;
+                        carve(nx, ny);
+                    }
+                }
+            }
+            carve(0, 0);
+            maze[0][0] = 0; 
+            maze[size-1][size-1] = 0;
+            maze[size-2][size-1] = 0; 
+            maze[size-1][size-2] = 0;
+            return maze;
+        }
+
+        function resizeCanvas() {
+            const containerWidth = canvas.parentElement.clientWidth - 16;
+            canvas.width = containerWidth;
+            canvas.height = containerWidth;
+            cellSize = canvas.width / gridCols;
+            if (activeGameId === 1 && mazeMap && mazeMap.length > 0) {
+                drawBoard();
+            }
+        }
+
+        function drawBoard() {
+            if (!mazeMap || mazeMap.length === 0) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let r = 0; r < gridRows; r++) {
+                for (let c = 0; c < gridCols; c++) {
+                    if (mazeMap[r] && mazeMap[r][c] === 1) {
+                        ctx.fillStyle = '#ff0055';
+                        ctx.fillRect(c * cellSize + 1.5, r * cellSize + 1.5, cellSize - 3, cellSize - 3);
+                    }
+                }
+            }
+            ctx.fillStyle = '#00ffcc';
+            ctx.fillRect(goal.x * cellSize + 4, goal.y * cellSize + 4, cellSize - 8, cellSize - 8);
+            ctx.fillStyle = '#ffee00';
+            ctx.beginPath();
+            ctx.arc(player.x * cellSize + cellSize / 2, player.y * cellSize + cellSize / 2, cellSize / 3.2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function movePlayer(dx, dy) {
+            if (!isPlaying || activeGameId !== 1 || !mazeMap || mazeMap.length === 0) return;
+            const nx = player.x + dx, ny = player.y + dy;
+            if (nx >= 0 && nx < gridCols && ny >= 0 && ny < gridRows && mazeMap[ny] && mazeMap[ny][nx] === 0) {
+                player.x = nx; player.y = ny;
+                playBeep(300, 'sine', 0.05);
+                drawBoard();
+                if (player.x === goal.x && player.y === goal.y) endGame(true);
+            }
+        }
+
+        function handleTouchMove(dx, dy) {
+            if (activeGameId === 1) movePlayer(dx, dy);
+            if (activeGameId === 9) checkRivalInputByVector(dx, dy);
+        }
+
+        function handleClicker() {
+            if (!isPlaying) return;
+            clickCount++;
+            playBeep(400 + clickCount * 10, 'sine', 0.03);
+            document.getElementById('click-target').textContent = clickCount;
+            if (clickCount >= targetClicks) endGame(true);
+        }
+
+        function startColorMemory() {
+            colorSequence = [Math.floor(Math.random()*4), Math.floor(Math.random()*4), Math.floor(Math.random()*4)];
+            userSequence = [];
+            playPatternSequence();
+        }
+
+        function playPatternSequence() {
+            isDisplayingPattern = true;
+            document.getElementById('simon-msg').textContent = "패턴 기억하는 중...";
+            colorSequence.forEach((colorIdx, step) => {
+                setTimeout(() => {
+                    flashColorBtn(colorIdx);
+                    if (step === colorSequence.length - 1) {
+                        setTimeout(() => {
+                            isDisplayingPattern = false;
+                            document.getElementById('simon-msg').textContent = "순서대로 누르세요!";
+                        }, 400);
+                    }
+                }, step * 500 + 300);
+            });
+        }
+
+        function flashColorBtn(idx) {
+            const btn = document.getElementById(`color-${idx}`);
+            if (!btn) return;
+            btn.classList.add('opacity-30');
+            playBeep(300 + idx * 150, 'square', 0.15);
+            setTimeout(() => btn.classList.remove('opacity-30'), 250);
+        }
+
+        function handleColorClick(idx) {
+            if (!isPlaying || isDisplayingPattern) return;
+            flashColorBtn(idx);
+            userSequence.push(idx);
+
+            const currentStep = userSequence.length - 1;
+            if (userSequence[currentStep] !== colorSequence[currentStep]) {
+                playBeep(150, 'sawtooth', 0.2);
+                userSequence = [];
+                document.getElementById('simon-msg').textContent = "틀렸습니다! 다시 누르세요.";
+                return;
+            }
+
+            if (userSequence.length === colorSequence.length) {
+                endGame(true);
+            }
+        }
+
+        function nextMathProblem() {
+            document.getElementById('math-score').textContent = mathScore;
+            if (mathScore >= mathGoal) {
+                endGame(true);
+                return;
+            }
+            const a = Math.floor(Math.random() * 12) + 2;
+            const b = Math.floor(Math.random() * 12) + 2;
+            const isPlus = Math.random() > 0.5;
+            mathAnswer = isPlus ? a + b : a * b;
+
+            document.getElementById('math-problem').textContent = `${a} ${isPlus ? '+' : '×'} ${b} = ?`;
+
+            let options = [mathAnswer, mathAnswer + 2, mathAnswer - 3, mathAnswer + 5].sort(() => Math.random() - 0.5);
+            const optionsBox = document.getElementById('math-options');
+            optionsBox.innerHTML = '';
+            options.forEach(opt => {
+                optionsBox.innerHTML += `<button onclick="checkMathAnswer(${opt})" class="py-2.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-cyan-300 font-bold rounded-xl active:scale-95">${opt}</button>`;
+            });
+        }
+
+        function checkMathAnswer(ans) {
+            if (!isPlaying) return;
+            if (ans === mathAnswer) {
+                playBeep(600, 'sine', 0.08);
+                mathScore++;
+                nextMathProblem();
+            } else {
+                playBeep(180, 'sawtooth', 0.15);
+            }
+        }
+
+        function spawnAimTarget() {
+            const margin = 30;
+            aimTargets = [{
+                x: margin + Math.random() * (canvas.width - margin * 2),
+                y: margin + Math.random() * (canvas.height - margin * 2),
+                r: 22
+            }];
+        }
+
+        function drawAimCanvas() {
+            if (activeGameId !== 5 || !isPlaying) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            aimTargets.forEach(t => {
+                ctx.fillStyle = '#00ffcc';
+                ctx.beginPath();
+                ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#ff0055';
+                ctx.beginPath();
+                ctx.arc(t.x, t.y, t.r / 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            requestAnimationFrame(drawAimCanvas);
+        }
+
+        canvas.addEventListener('click', (e) => {
+            if (!isPlaying) return;
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+
+            if (activeGameId === 5) {
+                aimTargets.forEach(t => {
+                    const dist = Math.hypot(clickX - t.x, clickY - t.y);
+                    if (dist <= t.r) {
+                        aimScore++;
+                        playBeep(700, 'sine', 0.08);
+                        if (aimScore >= aimGoal) endGame(true);
+                        else spawnAimTarget();
+                    }
+                });
+            } else if (activeGameId === 8) {
+                monsterTargets.forEach((m, idx) => {
+                    const dist = Math.hypot(clickX - m.x, clickY - m.y);
+                    if (dist <= m.r) {
+                        if (m.isMonster) {
+                            monsterScore++;
+                            playBeep(800, 'sine', 0.08);
+                            monsterTargets.splice(idx, 1);
+                            if (monsterScore >= monsterGoal) endGame(true);
+                            else spawnMonsterTargets();
+                        } else {
+                            playBeep(150, 'sawtooth', 0.2);
+                        }
+                    }
+                });
+            }
+        });
+
+        function updateTypingUI() {
+            if (currentWordIdx >= targetWords.length) {
+                endGame(true);
+                return;
+            }
+            document.getElementById('typing-count').textContent = targetWords.length - currentWordIdx;
+            document.getElementById('typing-target').textContent = targetWords[currentWordIdx];
+            const input = document.getElementById('typing-input');
+            input.value = '';
+            input.focus();
+        }
+
+        function checkTypingInput() {
+            if (!isPlaying) return;
+            const input = document.getElementById('typing-input');
+            if (input.value.trim().toUpperCase() === targetWords[currentWordIdx]) {
+                playBeep(650, 'sine', 0.08);
+                currentWordIdx++;
+                updateTypingUI();
+            }
+        }
+
+        function stopStopwatch() {
+            if (!isPlaying) return;
+            const currentSec = parseFloat(timerEl.textContent);
+            const elapsed = 10.00 - currentSec;
+            document.getElementById('stopwatch-display').textContent = elapsed.toFixed(2);
+
+            if (Math.abs(elapsed - 5.00) <= 0.08) {
+                endGame(true);
+            } else {
+                playBeep(180, 'sawtooth', 0.2);
+                messageBar.textContent = `오차 발생! (${elapsed.toFixed(2)}초) 5.00초에 다시 도전하세요!`;
+            }
+        }
+
+        function spawnMonsterTargets() {
+            monsterTargets = [];
+            for (let i = 0; i < 3; i++) {
+                monsterTargets.push({
+                    x: 40 + Math.random() * (canvas.width - 80),
+                    y: 40 + Math.random() * (canvas.height - 80),
+                    r: 24,
+                    isMonster: i === 0
+                });
+            }
+        }
+
+        function drawMonsterCanvas() {
+            if (activeGameId !== 8 || !isPlaying) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            monsterTargets.forEach(m => {
+                ctx.fillStyle = m.isMonster ? '#ff0055' : '#3b82f6';
+                ctx.beginPath();
+                ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            requestAnimationFrame(drawMonsterCanvas);
+        }
+
+        function nextRivalArrow() {
+            document.getElementById('rival-score').textContent = rivalScore;
+            if (rivalScore >= rivalGoal) {
+                endGame(true);
+                return;
+            }
+            currentArrowDir = Math.floor(Math.random() * 4);
+            document.getElementById('rival-arrow-box').textContent = dirNames[currentArrowDir];
+        }
+
+        function checkRivalInputByVector(dx, dy) {
+            let inputDir = -1;
+            if (dy === -1) inputDir = 0;
+            else if (dx === 1) inputDir = 1;
+            else if (dy === 1) inputDir = 2;
+            else if (dx === -1) inputDir = 3;
+
+            if (inputDir === oppositeDirs[currentArrowDir]) {
+                playBeep(600, 'sine', 0.08);
+                rivalScore++;
+                nextRivalArrow();
+            } else {
+                playBeep(150, 'sawtooth', 0.2);
+            }
+        }
+
+        function checkBombCode() {
+            if (!isPlaying) return;
+            const inputVal = document.getElementById('bomb-input').value;
+            if (inputVal === secretCode) {
+                endGame(true);
+            } else {
+                playBeep(180, 'sawtooth', 0.2);
+                const hint = inputVal < secretCode ? "UP ⬆ (더 큽니다)" : "DOWN ⬇ (더 작습니다)";
+                document.getElementById('bomb-hint').textContent = hint;
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d", "W", "A", "S", "D"].includes(e.key)) {
+                e.preventDefault();
+            }
+            if (!isPlaying) return;
+
+            if (activeGameId === 1) {
+                switch (e.key) {
+                    case 'ArrowUp': case 'w': case 'W': movePlayer(0, -1); break;
+                    case 'ArrowDown': case 's': case 'S': movePlayer(0, 1); break;
+                    case 'ArrowLeft': case 'a': case 'A': movePlayer(-1, 0); break;
+                    case 'ArrowRight': case 'd': case 'D': movePlayer(1, 0); break;
+                }
+            } else if (activeGameId === 9) {
+                switch (e.key) {
+                    case 'ArrowUp': case 'w': case 'W': checkRivalInputByVector(0, -1); break;
+                    case 'ArrowRight': case 'd': case 'D': checkRivalInputByVector(1, 0); break;
+                    case 'ArrowDown': case 's': case 'S': checkRivalInputByVector(0, 1); break;
+                    case 'ArrowLeft': case 'a': case 'A': checkRivalInputByVector(-1, 0); break;
+                }
+            }
+        });
+
+        function endGame(isSuccess) {
+            isPlaying = false;
+            clearInterval(timerInterval);
+            timerBox.classList.remove('timer-warning');
+
+            if (isSuccess) {
+                document.getElementById('result-icon').textContent = "🎉";
+                document.getElementById('result-title').textContent = "미션 클리어!";
+                document.getElementById('result-desc').textContent = "식곤증 퇴치! 잠깨기 사이렌 알람이 발동합니다!";
+
+                resultOverlay.classList.remove('hidden');
+                messageBar.textContent = "🚨 사이렌 발동 중! 잠이 꼈다면 [사이렌 끄기]를 누르세요.";
+                messageBar.className = "text-center text-xs sm:text-sm font-bold text-amber-300 min-h-[20px]";
+
+                stopSirenBtn.classList.remove('hidden');
+                headerStopSiren.classList.remove('hidden');
+                startBtn.classList.add('hidden');
+                mainBody.classList.add('alarm-flash');
+
+                playSirenSound();
+            } else {
+                document.getElementById('result-icon').textContent = "💀";
+                document.getElementById('result-title').textContent = "시간 초과!";
+                document.getElementById('result-desc').textContent = "10초가 지났습니다. 다시 도전하여 식곤증을 물리치세요!";
+
+                resultOverlay.classList.remove('hidden');
+                messageBar.textContent = "❌ 실패! [다시 도전하기]를 눌러 다시 시도하세요.";
+                messageBar.className = "text-center text-xs sm:text-sm font-bold text-rose-400 min-h-[20px]";
+            }
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+    </script>
+</body>
+</html>
